@@ -1,4 +1,4 @@
-
+ 
 name: Build Android APK
 
 on:
@@ -22,17 +22,18 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Accept Android SDK licenses
-        run: yes | sdkmanager --licenses
-
       - name: Install Android SDK packages
+        shell: bash
         run: |
-          sdkmanager --install "platforms;android-36"
-          sdkmanager --install "build-tools;36.0.0"
-          sdkmanager --install "platform-tools"
+          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager | head -n 1)"
+          if [ -z "$SDKMANAGER" ]; then
+            echo "ERROR: sdkmanager not found in $ANDROID_HOME"
+            exit 1
+          fi
+          yes | "$SDKMANAGER" --licenses || true
+          "$SDKMANAGER" --install "platforms;android-36"
+          "$SDKMANAGER" --install "build-tools;36.0.0"
+          "$SDKMANAGER" --install "platform-tools"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
